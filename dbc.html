@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#071a38">
+  <title>Tableau de bord — RIF RDC 2026</title>
+  <style>
+    :root{
+      --navy:#071a38;--navy-2:#0d2952;--red:#e83257;--red-soft:#fff0f4;
+      --blue:#0a4a70;--ink:#14243a;--muted:#718096;--line:#e5eaf1;
+      --paper:#f3f6fb;--white:#fff;--green:#168b67;--gold:#d99712;
+      --shadow:0 20px 55px rgba(7,26,56,.10)
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+    button,input,select{font:inherit}
+    button,a,input,select{outline-offset:3px}
+    .app{min-height:100vh;display:grid;grid-template-columns:250px minmax(0,1fr)}
+    .sidebar{position:sticky;top:0;height:100vh;padding:30px 20px 22px;background:linear-gradient(165deg,var(--navy),#0a2146 70%,#102f5e);color:#dce7f7;display:flex;flex-direction:column;z-index:20}
+    .logo{display:block;padding:2px 8px 28px;border-bottom:1px solid rgba(255,255,255,.1)}
+    .logo img{display:block;width:180px;max-width:100%;filter:brightness(0) invert(1)}
+    .menu-label{margin:27px 10px 10px;color:#778cad;font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase}
+    .menu{display:grid;gap:7px}
+    .menu a{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;color:#ccd9ed;text-decoration:none;font-size:13px;font-weight:650;transition:.2s ease}
+    .menu a:hover{background:rgba(255,255,255,.08);color:white}
+    .menu a.active{background:var(--red);color:#fff;box-shadow:0 12px 26px rgba(232,50,87,.28)}
+    .menu svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;flex:none}
+    .sidebar-foot{margin-top:auto;padding:17px 13px;border-radius:13px;background:rgba(255,255,255,.07);font-size:11px;line-height:1.6;color:#aebed7}
+    .sidebar-foot strong{display:block;color:#fff;font-size:12px}
+    .main{min-width:0;padding:0 34px 36px}
+    .topbar{min-height:86px;display:flex;align-items:center;justify-content:space-between;gap:18px;border-bottom:1px solid var(--line)}
+    .topbar-left{display:flex;align-items:center;gap:14px}
+    .menu-toggle{display:none;width:42px;height:42px;border:1px solid var(--line);border-radius:11px;background:white;cursor:pointer;color:var(--navy)}
+    .topbar h1{font-size:20px;margin:0;letter-spacing:-.3px}.topbar p{margin:3px 0 0;color:var(--muted);font-size:12px}
+    .admin{display:flex;align-items:center;gap:11px}.avatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--navy);color:white;font-weight:800;font-size:12px}.admin span{font-size:12px}.admin small{display:block;color:var(--muted)}
+    .content{max-width:1500px;margin:auto}
+    .hero-row{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;padding:30px 0 20px}
+    .eyebrow{margin:0 0 7px;color:var(--red);font-size:10px;font-weight:900;letter-spacing:1.6px;text-transform:uppercase}
+    .hero-row h2{margin:0;font-size:28px;letter-spacing:-.8px}.hero-row p:last-child{margin:7px 0 0;color:var(--muted);font-size:13px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    .btn{min-height:42px;border:0;border-radius:10px;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;cursor:pointer;font-size:12px;font-weight:800;transition:transform .2s,box-shadow .2s}.btn:hover{transform:translateY(-1px)}
+    .btn-primary{background:var(--red);color:#fff;box-shadow:0 10px 24px rgba(232,50,87,.22)}.btn-secondary{background:#fff;color:var(--navy);border:1px solid var(--line)}
+    .demo-note{display:none;margin:0 0 18px;padding:12px 15px;border:1px solid #ffd2dd;border-radius:11px;background:var(--red-soft);color:#96304a;font-size:12px}.demo-note.show{display:block}
+    .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+    .stat{position:relative;overflow:hidden;padding:20px;background:white;border:1px solid #edf0f5;border-radius:15px;box-shadow:0 8px 24px rgba(7,26,56,.05)}
+    .stat.is-action{cursor:pointer;transition:transform .2s,box-shadow .2s,border-color .2s}.stat.is-action:hover,.stat.is-action:focus-visible{transform:translateY(-2px);border-color:#f0c86f;box-shadow:0 14px 32px rgba(7,26,56,.12)}
+    .stat:after{content:"";position:absolute;right:-25px;bottom:-35px;width:95px;height:95px;border-radius:50%;background:var(--tint,#f1f4fa)}
+    .stat-head{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:11px;font-weight:750}.stat-icon{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--tint,#f1f4fa);color:var(--accent,var(--navy))}
+    .stat-icon svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2}
+    .stat strong{position:relative;z-index:1;display:block;margin-top:13px;font-size:28px;line-height:1}.stat small{position:relative;z-index:1;display:block;margin-top:8px;color:var(--muted);font-size:10px}
+    .panel{background:#fff;border:1px solid #edf0f5;border-radius:16px;box-shadow:var(--shadow)}
+    .panel-head{padding:19px 21px;display:flex;align-items:center;justify-content:space-between;gap:14px;border-bottom:1px solid var(--line)}
+    .panel-head h3{margin:0;font-size:14px}.panel-head p{margin:4px 0 0;color:var(--muted);font-size:10px}
+    .table-panel{margin-top:18px;overflow:hidden}
+    .toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.search{position:relative}.search input,.toolbar select{height:38px;border:1px solid var(--line);border-radius:9px;background:#f8fafc;color:var(--ink);font-size:11px}.search input{width:210px;padding:0 12px 0 34px}.search svg{position:absolute;left:11px;top:11px;width:16px;height:16px;stroke:#8a98aa;fill:none;stroke-width:2}.toolbar select{padding:0 28px 0 10px}
+    .table-scroll{overflow:auto}.table{width:100%;border-collapse:collapse;min-width:820px}.table th{padding:12px 18px;background:#f8fafc;color:#8290a3;text-align:left;font-size:9px;letter-spacing:.7px;text-transform:uppercase}.table td{padding:14px 18px;border-top:1px solid #edf0f4;font-size:11px;white-space:nowrap}.person{display:flex;align-items:center;gap:10px}.person-avatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:white;font-size:9px;font-weight:900}.person strong{display:block;font-size:11px}.person small{color:var(--muted);font-size:9px}.ref{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;color:#607089}.status{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:20px;font-size:9px;font-weight:850}.status:before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}.status.waiting{background:#fff5df;color:#a96a00}.status.paid{background:#e7f7f1;color:#137153}.status.confirmed{background:#e9f1ff;color:#245da9}
+    .payment-select{height:32px;padding:0 27px 0 10px;border:1px solid var(--line);border-radius:8px;background:#f8fafc;color:var(--ink);font-size:10px;font-weight:800}.payment-select.paid{border-color:#bfe8d8;background:#e7f7f1;color:#137153}.payment-select.unpaid{border-color:#f3d99e;background:#fff5df;color:#946000}
+    .empty{padding:42px;text-align:center;color:var(--muted);font-size:12px}.empty strong{display:block;margin-bottom:6px;color:var(--ink);font-size:14px}
+    .toast{position:fixed;right:22px;bottom:22px;z-index:50;padding:13px 17px;border-radius:11px;background:var(--navy);color:white;box-shadow:var(--shadow);font-size:11px;opacity:0;transform:translateY(12px);pointer-events:none;transition:.25s}.toast.show{opacity:1;transform:none}
+    @media(max-width:1100px){.stats{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:760px){.app{display:block}.sidebar{position:fixed;left:-270px;width:250px;transition:left .25s}.sidebar.open{left:0;box-shadow:20px 0 50px rgba(0,0,0,.25)}.main{padding:0 16px 28px}.menu-toggle{display:grid;place-items:center}.topbar{min-height:76px}.admin span{display:none}.hero-row{align-items:flex-start;flex-direction:column;padding-top:24px}.hero-row h2{font-size:24px}.stats{grid-template-columns:1fr 1fr}.panel-head{align-items:flex-start;flex-direction:column}.toolbar{width:100%}.search,.search input{width:100%}.toolbar select{flex:1}.chart{gap:6px}.bar{width:22px}}
+    @media(max-width:440px){.stats{grid-template-columns:1fr}.actions{width:100%}.actions .btn{flex:1}.stat{padding:17px}.topbar h1{font-size:17px}}
+    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar">
+      <a class="logo" href="index.html" aria-label="Retour au site RIF RDC"><img src="Logorif.png" alt="RIF RDC"></a>
+      <p class="menu-label">Administration</p>
+      <nav class="menu" aria-label="Navigation principale">
+        <a href="#vue-ensemble"><svg viewBox="0 0 24 24"><path d="M4 13h6V4H4v9Zm10 7h6V11h-6v9ZM4 20h6v-3H4v3Zm10-13h6V4h-6v3Z"/></svg>Vue d’ensemble</a>
+        <a class="active" href="#inscriptions"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm13 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Inscriptions</a>
+      </nav>
+      <div class="sidebar-foot"><strong>RIF RDC 2026</strong>26–28 octobre<br>Fleuve Congo Hôtel</div>
+    </aside>
+
+    <main class="main">
+      <div class="content">
+        <header class="topbar">
+          <div class="topbar-left">
+            <button class="menu-toggle" id="menuToggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false">☰</button>
+            <div><h1>RIF Admin</h1><p>Gestion des participants</p></div>
+          </div>
+          <div class="admin"><div class="avatar">AD</div><span><strong>Administrateur</strong><small>Équipe organisationnelle</small></span></div>
+        </header>
+
+        <section class="hero-row" id="vue-ensemble">
+          <div><p class="eyebrow">Tableau de bord</p><h2>Suivi des inscriptions</h2><p>Vue d’ensemble des participants au RIF RDC 2026.</p></div>
+          <div class="actions"><button class="btn btn-secondary" id="exportBtn" type="button">↓ Exporter CSV</button><a class="btn btn-primary" href="index.html#inscription">+ Nouvelle inscription</a></div>
+        </section>
+
+        <div class="demo-note" id="demoNote"></div>
+
+        <section class="stats" aria-label="Indicateurs clés">
+          <article class="stat" style="--accent:#e83257;--tint:#fff0f4"><div class="stat-head"><span>Total inscriptions</span><span class="stat-icon"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm11 0v6m3-3h-6"/></svg></span></div><strong id="totalStat">0</strong><small id="todayStat">0 nouvelle aujourd’hui</small></article>
+          <article class="stat" style="--accent:#168b67;--tint:#e9f7f2"><div class="stat-head"><span>Paiements reçus</span><span class="stat-icon"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M16 15h2"/></svg></span></div><strong id="paidStat">0</strong><small id="paidRate">0 % des inscrits</small></article>
+          <article class="stat is-action" id="waitingCard" role="button" tabindex="0" aria-label="Afficher les inscriptions en attente" style="--accent:#d99712;--tint:#fff7e5"><div class="stat-head"><span>En attente</span><span class="stat-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span></div><strong id="waitingStat">0</strong><small>Cliquer pour afficher la liste</small></article>
+        </section>
+
+        <section class="panel table-panel" id="inscriptions">
+          <div class="panel-head"><div><h3>Liste des participants</h3><p id="resultCount">0 inscription</p></div><div class="toolbar"><label class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="searchInput" type="search" placeholder="Rechercher un participant" aria-label="Rechercher"></label><select id="sexFilter" aria-label="Filtrer par sexe"><option value="">Tous les sexes</option><option value="Femme">Femme</option><option value="Homme">Homme</option></select><select id="paymentFilter" aria-label="Filtrer par paiement"><option value="">Tous les paiements</option><option value="Payé">Payé</option><option value="Non payé">Non payé</option></select><select id="statusFilter" aria-label="Filtrer par confirmation"><option value="">Toutes les confirmations</option><option value="En attente">En attente</option><option value="Confirmé">Confirmé</option></select></div></div>
+          <div class="table-scroll"><table class="table"><thead><tr><th>Participant</th><th>Profil / Fonction</th><th>Sexe</th><th>Téléphone</th><th>Référence</th><th>Date</th><th>Paiement</th></tr></thead><tbody id="tableBody"></tbody></table><div class="empty" id="emptyState" hidden><strong>Aucune inscription trouvée</strong>Modifiez vos filtres ou enregistrez un nouveau participant.</div></div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script>
+    'use strict';
+    const MAX_RECORDS=2000,PAGE_SIZE=500,colors=['#e83257','#0a8fa8','#6b62c9','#e09527','#1b8b69','#2871c8'];
+    const $=id=>document.getElementById(id);
+    let records=[];
+    const escapeHTML=value=>String(value??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+    const initials=name=>String(name||'?').trim().split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase();
+    const dateText=value=>{const date=new Date(value);return Number.isNaN(date.getTime())?'—':date.toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'})};
+    const statusClass=status=>status==='Payé'?'paid':status==='Confirmé'?'confirmed':'waiting';
+    function updateStats(){
+      const total=records.length,paid=records.filter(r=>r.paiement==='Payé').length,waiting=records.filter(r=>r.paiement!=='Payé').length;
+      const today=new Date().toISOString().slice(0,10),todayCount=records.filter(r=>String(r.created_at||'').slice(0,10)===today).length;
+      $('totalStat').textContent=`${total} / ${MAX_RECORDS}`;$('paidStat').textContent=paid;$('waitingStat').textContent=waiting;
+      $('todayStat').textContent=`${todayCount} nouvelle${todayCount>1?'s':''} aujourd’hui`;$('paidRate').textContent=`${total?Math.round(paid/total*100):0} % des inscrits`;
+    }
+    function renderTable(){
+      const query=$('searchInput').value.trim().toLowerCase(),sex=$('sexFilter').value,payment=$('paymentFilter').value,status=$('statusFilter').value;
+      const filtered=records.filter(r=>[r.nom,r.fonction,r.email,r.telephone,r.reference].join(' ').toLowerCase().includes(query)&&(!sex||r.sexe===sex)&&(!payment||r.paiement===payment)&&(!status||r.status===status));
+      $('tableBody').innerHTML=filtered.map((r,index)=>`<tr><td><div class="person"><span class="person-avatar" style="background:${colors[index%colors.length]}">${escapeHTML(initials(r.nom))}</span><span><strong>${escapeHTML(r.nom)}</strong><small>${escapeHTML(r.email||'—')}</small></span></div></td><td>${escapeHTML(r.fonction||'—')}</td><td>${escapeHTML(r.sexe||'—')}</td><td>${escapeHTML(r.telephone||'—')}</td><td class="ref">${escapeHTML(r.reference||'—')}</td><td>${escapeHTML(dateText(r.created_at))}</td><td><select class="payment-select ${r.paiement==='Payé'?'paid':'unpaid'}" data-reference="${escapeHTML(r.reference||'')}" aria-label="Paiement de ${escapeHTML(r.nom)}"><option value="Non payé" ${r.paiement==='Non payé'?'selected':''}>Non payé</option><option value="Payé" ${r.paiement==='Payé'?'selected':''}>Payé</option></select></td></tr>`).join('');
+      document.querySelectorAll('.payment-select').forEach(select=>select.addEventListener('change',()=>updatePayment(select)));
+      $('emptyState').hidden=filtered.length>0;$('resultCount').textContent=`${filtered.length} inscription${filtered.length>1?'s':''}`;
+    }
+    async function updatePayment(select){
+      const record=records.find(r=>r.reference===select.dataset.reference);if(!record||!window.rifSupabase)return;const paiement=select.value,previous=record.paiement;select.disabled=true;
+      const query=window.rifSupabase.from('inscriptions').update({paiement}).eq(record.id?'id':'reference',record.id||record.reference).select('id');
+      const {data,error}=await query;
+      if(error||!data?.length){select.value=previous;select.disabled=false;showToast('Impossible d’enregistrer le paiement');return}
+      record.paiement=paiement;updateStats();renderTable();showToast(`${record.nom} : ${paiement}`);
+    }
+    async function loadRemoteRecords(){
+      if(!window.rifSupabase)throw new Error('Client Supabase indisponible');
+      const loaded=[];
+      for(let from=0;from<MAX_RECORDS;from+=PAGE_SIZE){const {data,error}=await window.rifSupabase.from('inscriptions').select('id,reference,nom,fonction,sexe,telephone,email,paiement,status,created_at').order('created_at',{ascending:false}).range(from,from+PAGE_SIZE-1);if(error)throw error;loaded.push(...(data||[]));if(!data||data.length<PAGE_SIZE)break}
+      records=[...new Map(loaded.map(r=>[r.id||r.reference,r])).values()].map(r=>({...r,paiement:r.paiement||'Non payé',status:r.status||'En attente'}));$('demoNote').classList.remove('show');updateStats();renderTable();
+    }
+    async function initializeDashboard(){
+      if(!window.rifSupabase){$('demoNote').innerHTML='<strong>Configuration requise :</strong> renseignez les clés de votre nouveau projet dans supabase-config.js.';$('demoNote').classList.add('show');return}
+      try{await loadRemoteRecords()}catch(_){$('demoNote').innerHTML='<strong>Erreur :</strong> impossible de charger les inscriptions depuis Supabase. Vérifiez la configuration et les règles d’accès.';$('demoNote').classList.add('show')}
+    }
+    function exportCSV(){
+      const headers=['Nom complet','Profil / Fonction','Sexe','Téléphone','Adresse e-mail','Référence','Date','Paiement','Confirmation'];
+      const rows=records.map(r=>[r.nom,r.fonction,r.sexe,r.telephone,r.email,r.reference,dateText(r.created_at),r.paiement,r.status]);
+      const csv='\ufeff'+[headers,...rows].map(row=>row.map(value=>'"'+String(value??'').replace(/"/g,'""')+'"').join(';')).join('\n');
+      const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='inscriptions-rif-rdc-2026.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);showToast('Export CSV téléchargé');
+    }
+    function showToast(message){const toast=$('toast');toast.textContent=message;toast.classList.add('show');clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>toast.classList.remove('show'),2500)}
+    ['searchInput','sexFilter','paymentFilter','statusFilter'].forEach(id=>$(id).addEventListener(id==='searchInput'?'input':'change',renderTable));
+    function showWaiting(){
+      $('searchInput').value='';$('sexFilter').value='';$('paymentFilter').value='Non payé';$('statusFilter').value='';renderTable();
+      $('inscriptions').scrollIntoView({behavior:'smooth',block:'start'});showToast('Filtre « En attente » appliqué');
+    }
+    $('waitingCard').addEventListener('click',showWaiting);
+    $('waitingCard').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showWaiting()}});
+    $('exportBtn').addEventListener('click',exportCSV);
+    $('menuToggle').addEventListener('click',()=>{const open=$('sidebar').classList.toggle('open');$('menuToggle').setAttribute('aria-expanded',String(open))});
+    document.querySelectorAll('.menu a[href^="#"]').forEach(link=>link.addEventListener('click',e=>{if(!document.querySelector(link.getAttribute('href'))){e.preventDefault();showToast('Cette rubrique sera disponible prochainement')}if(innerWidth<=760)$('sidebar').classList.remove('open')}));
+    updateStats();renderTable();initializeDashboard();
+  </script>
+</body>
+</html>

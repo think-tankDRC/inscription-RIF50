@@ -1,0 +1,18 @@
+FORMULAIRE D’INSCRIPTION — RIF RDC 2026
+
+UTILISATION
+1. Extrayez le dossier ZIP.
+2. Ouvrez index.html dans un navigateur récent.
+3. Pour publier, déposez index.html dans le dossier public de votre hébergement.
+
+L’affiche, les styles et le JavaScript sont intégrés dans index.html : aucune installation ni dépendance externe.
+
+FONCTIONS
+Formulaire responsive avec champs obligatoires, sauvegarde de la dernière demande dans le navigateur, récapitulatif téléchargeable en texte, impression / enregistrement PDF, ouverture d’un e-mail prérempli pour l’organisateur, modification et suppression de la demande locale.
+
+IMPORTANT
+Aucune base de données distante n’est connectée. Chaque appareil conserve uniquement sa dernière demande. Les organisateurs ne reçoivent aucune donnée automatiquement. L’utilisateur doit envoyer l’e-mail proposé ou transmettre le récapitulatif à strategierdc@gmail.com. Le lien e-mail nécessite une application ou un service de messagerie configuré. Une confirmation d’admission ou de paiement n’est pas générée.
+Pour centraliser les inscriptions en ligne, une base de données avec règles d’accès ou un service de formulaire doit être connecté avant mise en production.
+
+CONTENU
+Dates, lieu, horaires, thème et contacts repris de l’affiche fournie. Aucun programme détaillé ni tarif n’est inventé.
